@@ -36,8 +36,19 @@ system.addForce(MonteCarloBarostat(1*bar, 300*kelvin))
 # We use a 2 fs (0.002 ps) time step which is standard for simulations with HBonds constrained
 integrator = LangevinMiddleIntegrator(300*kelvin, 1/picosecond, 0.002*picoseconds)
 
-# 7. Initialize the Simulation
-simulation = Simulation(modeller.topology, system, integrator)
+# 7. Initialize the Simulation with CUDA
+print("Setting up CUDA platform...")
+
+# Request the CUDA platform
+platform = Platform.getPlatformByName('CUDA')
+
+# Optional but highly recommended: Set precision to 'mixed' 
+# This gives you the speed of single-precision with the accuracy of double-precision where it matters.
+# You can also specify a specific GPU if you have multiple (e.g., 'DeviceIndex': '0')
+properties = {'CudaPrecision': 'mixed'}
+
+# Create the simulation object, passing in the platform and properties
+simulation = Simulation(modeller.topology, system, integrator, platform, properties)
 simulation.context.setPositions(modeller.positions)
 
 # 8. Minimize the energy to resolve steric clashes from the AlphaFold model and added water
