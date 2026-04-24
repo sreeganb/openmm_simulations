@@ -23,6 +23,12 @@ modeller.addHydrogens(forcefield)
 # Adds a TIP3P water box with a 1 nm padding around the protein and 0.15 M NaCl
 modeller.addSolvent(forcefield, padding=1.0*nanometer, model='tip3p', ionicStrength=0.15*molar)
 
+# ---> ADD THESE LINES <---
+print("Saving solvated topology...")
+with open('solvated_system.pdb', 'w') as f:
+    PDBFile.writeFile(modeller.topology, modeller.positions, f)
+# ------------------------
+
 # 4. Create the system
 print("Creating system...")
 system = forcefield.createSystem(modeller.topology, nonbondedMethod=PME,
@@ -59,16 +65,16 @@ simulation.minimizeEnergy()
 simulation.context.setVelocitiesToTemperature(300*kelvin)
 
 # 10. Set up Reporters
-# 100 ns = 100,000 ps. With a 0.002 ps step, that is 50,000,000 steps.
-# We will save a frame every 50,000 steps (every 100 ps) to yield 1,000 total frames in the DCD.
+# 50 ns = 50,000 ps. With a 0.002 ps step, that is 25,000,000 steps.
+# We will save a frame every 50,000 steps (every 100 ps) to yield 500 total frames in the DCD.
 report_interval = 50000
 
-simulation.reporters.append(DCDReporter('output.dcd', report_interval))
+simulation.reporters.append(DCDReporter('syngap1_trimer_openmm.dcd', report_interval))
 simulation.reporters.append(StateDataReporter(stdout, report_interval, step=True,
         potentialEnergy=True, temperature=True, volume=True, speed=True))
 
-# 11. Run the Production Simulation (100 ns)
-total_steps = 50000000
-print(f"Starting simulation for {total_steps} steps (100 ns)...")
+# 11. Run the Production Simulation (50 ns)
+total_steps = 25000000
+print(f"Starting simulation for {total_steps} steps (50 ns)...")
 simulation.step(total_steps)
 print("Simulation complete!")
