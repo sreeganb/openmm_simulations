@@ -5,7 +5,8 @@ from sys import stdout
 
 # 1. Load the AlphaFold PDB
 print("Loading PDB...")
-pdb = PDBFile('input.pdb')
+pdb = PDBFile('./data/pdb/syngap1_trimer.pdb')
+cif_file = PDBxFile('./data/pdb/syngap1_trimer.cif')
 
 # 2. Specify the CHARMM36 force field and water model
 print("Loading CHARMM force field...")
@@ -13,7 +14,12 @@ forcefield = ForceField('charmm36.xml', 'charmm36/water.xml')
 
 # 3. Solvate the system using Modeller
 print("Adding solvent and neutralizing ions...")
-modeller = Modeller(pdb.topology, pdb.positions)
+#modeller = Modeller(pdb.topology, pdb.positions)
+modeller = Modeller(cif_file.topology, cif_file.positions)
+
+# Add missing hydrogen atoms
+modeller.addHydrogens(forcefield)
+
 # Adds a TIP3P water box with a 1 nm padding around the protein and 0.15 M NaCl
 modeller.addSolvent(forcefield, padding=1.0*nanometer, model='tip3p', ionicStrength=0.15*molar)
 
